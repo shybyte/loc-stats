@@ -1,0 +1,1 @@
+scc  -i ts,tsx --by-file -f json -o typescript.json
