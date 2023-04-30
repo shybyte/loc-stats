@@ -14,10 +14,10 @@ export interface FilesByType {
     Complexity:         number;
     Count:              number;
     WeightedComplexity: number;
-    Files:              File[];
+    Files:              SccFile[];
 }
 
-export interface File {
+export interface SccFile {
     Language:           FileType;
     PossibleLanguages:  FileType[];
     Filename:           string;

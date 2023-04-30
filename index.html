@@ -8,6 +8,15 @@
   </head>
   <body>
     <div id="app">
+      <div id="toolbar">
+        <select id="metricSelector">
+          <option value="Lines">Lines</option>
+          <option value="Code">Code</option>
+          <option value="Comment">Comment</option>
+        </select>
+        <label><input id="percentCheckbox" type="checkbox">Percent</label>  
+        <label><input id="logScaleCheckbox" type="checkbox" checked>LogScale</label>  
+      </div>
       <div id="chart"></div>
     </div>
     <script type="module" src="/src/main.ts"></script>
