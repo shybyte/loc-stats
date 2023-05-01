@@ -17,10 +17,15 @@ export function renderTable(
   projects: Project[],
   selectedMetric: keyof SccFile,
   minMetricValue: number,
+  selectedProjectNames: Partial<Record<string, boolean>>,
 ) {
-  metricNameTableHeader.innerText = selectedMetric;
+  metricNameTableHeader.innerText = minMetricValue
+    ? `${selectedMetric} >= ${Math.round(minMetricValue)}`
+    : selectedMetric;
 
-  const rows: RowVm[] = projects.flatMap((project) =>
+  const rows: RowVm[] = projects.filter((project) =>
+    selectedProjectNames[project.name] !== false
+  ).flatMap((project) =>
     project.sccResult.flatMap((filesByType) =>
       filesByType.Files.map((file) => ({
         file: file,
@@ -37,6 +42,9 @@ export function renderTable(
   fileTableBody.innerHTML = sortedRows.map((file) => {
     const marker =
       `<span class="serie-marker" style="background-color: ${file.project.color}"></span>`;
-    return `<tr><th>${marker} ${file.file.Filename}</th><td>${file.metricValue}</td></tr>`;
+    const fileLink = `<a target='_blank' href=${
+      file.project.url + file.file.Location
+    }>${marker} ${file.file.Filename}</a>`;
+    return `<tr><th>${fileLink}</th><td>${file.metricValue}</td></tr>`;
   }).join("");
 }

@@ -15,26 +15,31 @@ const myChart = echarts.init(chartEl);
 //   console.log('Selected item:', params);
 // });
 
-myChart.on("click", function (params: any) {
-  console.log("Click", params);
+let selectedProjectNames: Partial<Record<string, boolean>> = {};
 
-  // const xValue = params.event.offsetX;
-  // const xAxis = myChart.getModel().getComponent('xAxis');
-  // const xIndex = xAxis.getAxis().findIndex(x => x <= xValue);
-
-  // myChart.dispatchAction({
-  //   type: 'legendSelect',
-  //   name: myChart.getOption().legend.data[xIndex],
-  // });
-});
+myChart.on("legendselectchanged", (params: any) => {
+    console.log("legendselectchanged", params);
+    selectedProjectNames = params.selected as any;
+    renderTable(
+      projects,
+      metricSelector.value as (keyof SccFile),
+      0,
+      selectedProjectNames
+    );
+  });
 
 var zr = myChart.getZr();
-zr.on('click', function (params) {
+zr.on("click", function (params) {
   var pointInPixel = [params.offsetX, params.offsetY];
-  var pointInGrid = myChart.convertFromPixel('grid', pointInPixel);
-  if (myChart.containPixel('grid', pointInPixel)) {
-   console.log('pointInGrid',pointInGrid);
-   renderTable(projects, metricSelector.value as (keyof SccFile), pointInGrid[0]);
+  var pointInGrid = myChart.convertFromPixel("grid", pointInPixel);
+  if (myChart.containPixel("grid", pointInPixel)) {
+    console.log("pointInGrid", pointInGrid);
+    renderTable(
+      projects,
+      metricSelector.value as (keyof SccFile),
+      pointInGrid[0],
+      selectedProjectNames
+    );
   }
 });
 
@@ -59,26 +64,32 @@ metricSelector.addEventListener("change", () => {
   renderChart();
 });
 
+interface ProjectDef {
+  name: string;
+  url: string;
+}
 
-const projectNames = ["kraulie", "typescript"];
+const projectDefs: ProjectDef[] = [{ name: "kraulie", url: "" }, {
+  name: "typescript",
+  url: "https://github.com/microsoft/TypeScript/blob/main/src/",
+}];
 // const projectNames = ["typescript"];
 // const projectNames = ["kraulie"];
-
-
 
 async function loadProjects() {
   let i = 0;
 
-  for (const projectName of projectNames) {
-    const sccResult: SccResult = await fetch("/data/" + projectName + ".json")
+  for (const projectDef of projectDefs) {
+    const sccResult: SccResult = await fetch("/data/" + projectDef.name + ".json")
       .then((r) => r.json());
-    console.log(`Loaded project ${projectName}`, sccResult);
+    console.log(`Loaded project ${projectDef}`, sccResult);
 
     const project: Project = {
-      name: projectName,
+      name: projectDef.name,
+      url: projectDef.url,
       sccResult,
       data: [],
-      color: COLORS[i]
+      color: COLORS[i],
     };
 
     projects.push(project);
@@ -90,8 +101,6 @@ async function loadProjects() {
 function renderChart() {
   const selectedMetric = metricSelector.value as (keyof SccFile);
   const isInPercent = percentCheckbox.checked;
-
-  renderTable(projects, selectedMetric, 0);
 
   for (const project of projects) {
     const allFiles = project.sccResult.flatMap((filesByType) =>
@@ -229,6 +238,8 @@ function renderChart() {
       smooth: true,
     })),
   });
+
+  renderTable(projects, selectedMetric, 0, selectedProjectNames);
 }
 
 async function main() {

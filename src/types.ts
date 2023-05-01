@@ -5,6 +5,7 @@ export const COLORS = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#
 
 export interface Project {
     name: string;
+    url: string;
     sccResult: SccResult;
     data: XyTupel[];
     color: string;
